@@ -1,3 +1,9 @@
+### 1.6.0 - 12/06/2019
+* Syntatic sugar updates
+* Remove debug group
+* Debug logs
+* Promote multiple packages
+
 ### 1.5.5 - 24/02/2019
 * Change feed url
 

@@ -25,7 +25,7 @@ Steps
 3) Select the package path  
 ![How to](images/how-to.png)
 
-## Build
+## Build & Package
 
 ```bash
 npm run-script build

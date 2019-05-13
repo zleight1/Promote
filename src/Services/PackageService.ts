@@ -1,3 +1,4 @@
+import * as tl from 'azure-pipelines-task-lib/task';
 import {PackageDetails} from "../Interfaces/PackageDetails";
 import {ArtifactApi} from "../Providers/ArtifactApi";
 import {ArtifactResponse} from "../Interfaces/ArtifactInterfaces";
@@ -47,6 +48,8 @@ export class PackageService implements IPackageService
         feedType: string) : PackageDetails {
 
         let fileName = packagePath.replace(/^.*[\\\/]/, '');
+        tl.debug("PackageService.getPackageDetailsFromPath - fileName:" + fileName);
+
         if(fileName == null)
             throw new Error("[!] Invalid full filename: " + fileName);
 
@@ -55,14 +58,17 @@ export class PackageService implements IPackageService
         switch (feedType) {
             case "nuget" :
                 regexGroup = fileName.match(/^(.*?)\.((?:\.?[0-9]+){3,}(?:[-a-z]+)?)\.nupkg$/);
+                tl.debug("PackageService.getPackageDetailsFromPath - fileNameRegex:/^(.*?)\\.((?:\\.?[0-9]+){3,}(?:[-a-z]+)?)\\.nupkg$/");
                 break;
 
             case "npm" :
                 regexGroup = fileName.match(/^(.*?)-((?:\.?[0-9]+){3,}(?:[-a-z]+)?)\.tgz$/);
+                tl.debug("PackageService.getPackageDetailsFromPath - fileNameRegex:/^(.*?)-((?:\\.?[0-9]+){3,}(?:[-a-z]+)?)\\.tgz$/");
                 break;
 
             case "pypi" :
                 regexGroup = fileName.match(/^(.*?)-([._0-9a-zA-Z]+)(?:-(.*))\.whl$/);
+                tl.debug("PackageService.getPackageDetailsFromPath - fileNameRegex:/^(.*?)-([._0-9a-zA-Z]+)(?:-(.*))\\.whl$/");
                 break;
 
             default :
@@ -73,9 +79,9 @@ export class PackageService implements IPackageService
             throw new Error("[!] Invalid filename " + regexGroup);
 
         let name: string = regexGroup[1];
-        let version: string = regexGroup[2];
-
         console.log(`Package name: ${name}`);
+
+        let version: string = regexGroup[2];
         console.log(`Package version: ${version}`);
 
         return new PackageDetails(name, version);
@@ -121,18 +127,27 @@ export class PackageService implements IPackageService
      */
     public async getPackageProtocolType(
         feedId: string): Promise<string> {
+        tl.debug("PackageService.getPackageProtocolType - Getting package protocol type for:" + feedId);
 
         let artifactAPI = new ArtifactApi();
         let packages:ArtifactResponse = await artifactAPI.getPackages(feedId);
+        tl.debug("PackageService.getPackageProtocolType - response:" + packages);
 
         if(packages.count <= 0)
             throw new Error("Could not determine feedtype, please make sure the packages exists within the feed.");
 
-        return packages.value[0].protocolType.toLowerCase();
+        const protocolType = packages.value[0].protocolType.toLowerCase();
+        tl.debug("PackageService.getPackageProtocolType - Found protocol type:" + protocolType);
+
+        return protocolType;
     }
 
-    static isFeedTypeSupported(feedType:string):boolean
+    static isFeedTypeSupported(
+        feedType:string):boolean
     {
-        return feedType == "nuget" || feedType == "pypi" || feedType == "npm";
+        const isSupported = feedType == "nuget" || feedType == "pypi" || feedType == "npm";
+        console.log("PackageService.isFeedTypeSupported - supported:" + isSupported);
+
+        return isSupported;
     }
 }

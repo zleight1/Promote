@@ -1,7 +1,8 @@
+import * as tl from 'azure-pipelines-task-lib/task';
 import {ClientBase} from "./ClientBase";
 import {IHeaders, IRequestHandler, IRequestOptions} from "typed-rest-client/Interfaces";
 import {RestClient} from "typed-rest-client/RestClient";
-import {ArtifactResponse,JsonPatchOperation, Operation, RequestBody} from "../Interfaces/ArtifactInterfaces";
+import {ArtifactResponse, Operation, RequestBody} from "../Interfaces/ArtifactInterfaces";
 import {PackageDetails} from "../Interfaces/PackageDetails";
 import {HttpClient} from "typed-rest-client/HttpClient";
 
@@ -29,8 +30,10 @@ export class ArtifactApi extends ClientBase implements IArtifactApi
     {
         const apiVersion = "5.0-preview.1";
 
-        const options:IRequestOptions = this.createRequestOptions(apiVersion);
-        const handlers:IRequestHandler[] = this.createHandlers();
+        const options:IRequestOptions = ClientBase.createRequestOptions(apiVersion);
+        tl.debug("ArtifactApi.getPackages - options:" + JSON.stringify(options));
+
+        const handlers:IRequestHandler[] = ClientBase.createHandlers();
 
         const restClient = new RestClient(
             "haplo-promote",
@@ -39,8 +42,10 @@ export class ArtifactApi extends ClientBase implements IArtifactApi
             options);
 
         const pathAndQuery = `/${this.OrganizationName}/_apis/packaging/Feeds/${feedId}/packages?api-version=${apiVersion}`;
+        tl.debug("ArtifactApi.getPackages - url:https://feeds.dev.azure.com" + pathAndQuery);
 
         const response = await restClient.get<ArtifactResponse>(pathAndQuery);
+        tl.debug("ArtifactApi.getPackages - Artifact Response:" + JSON.stringify(response));
 
         return response.result;
     }
@@ -53,9 +58,10 @@ export class ArtifactApi extends ClientBase implements IArtifactApi
     {   
         const apiVersion = "5.0-preview.1";
 
-        const options: IHeaders = this.createRequestOptions(apiVersion);
+        const options: IHeaders = ClientBase.createRequestOptions(apiVersion);
+        tl.debug("ArtifactApi.updatePackageVersion - options:" + JSON.stringify(options));
 
-        const handlers: IRequestHandler[] = this.createHandlers();
+        const handlers: IRequestHandler[] = ClientBase.createHandlers();
 
         const httpClient = new HttpClient(
             "haplo-promote",
@@ -63,8 +69,10 @@ export class ArtifactApi extends ClientBase implements IArtifactApi
             options);
 
         const requestData = ArtifactApi.createAddRequestBody(viewId);
+        tl.debug("ArtifactApi.updatePackageVersion - requestData:" + JSON.stringify(requestData));
 
-        const headers = this.createRequestHeaders(apiVersion);
+        const headers = ClientBase.createRequestHeaders(apiVersion);
+        tl.debug("ArtifactApi.updatePackageVersion - headers:" + JSON.stringify(headers));
 
         const response = await httpClient.patch(
             `https://pkgs.dev.azure.com/${this.OrganizationName}/_apis/packaging/feeds/${feedId}/${protocolType}/packages/${packageDetails.name}/versions/${packageDetails.version}?api-version=${apiVersion}`,
@@ -72,6 +80,7 @@ export class ArtifactApi extends ClientBase implements IArtifactApi
             headers);
 
         const packageResponse = await this.processResponse<void>(response, null);
+        tl.debug("ArtifactApi.updatePackageVersion - packageResponse:" + JSON.stringify(packageResponse));
 
         if(packageResponse.statusCode > 299)
             throw new Error(`Unsuccessful request, status code:${packageResponse.statusCode}`);
@@ -79,8 +88,8 @@ export class ArtifactApi extends ClientBase implements IArtifactApi
         return packageResponse.result;
     }
 
-    static createAddRequestBody = (viewId: string): RequestBody =>
-    {        
+    static createAddRequestBody (viewId: string): RequestBody
+    {
         return {
             views:{
                 op: Operation.add,

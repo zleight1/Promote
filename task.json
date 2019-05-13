@@ -15,8 +15,8 @@
     "author": "Haplo",
     "version": {
         "Major": 1,
-        "Minor": 5,
-        "Patch": 5
+        "Minor": 6,
+        "Patch": 0
     },
     "instanceNameFormat": "Promote package",
     "groups": [
@@ -24,11 +24,6 @@
             "name": "general",
             "displayName": "General",
             "isExpanded": true
-        },
-        {
-            "name": "debug",
-            "displayName": "Debug",
-            "isExpanded": false
         }
     ],
     "inputs": [

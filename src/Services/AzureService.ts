@@ -7,6 +7,7 @@ export class AzureService
      */
     static getOrganizationName() : string {
         let teamFoundationServerUri:string = tl.getVariable("SYSTEM_TEAMFOUNDATIONCOLLECTIONURI");
+        tl.debug("NpmArtifactApi.getOrganizationName - teamFoundationServerUri:"+teamFoundationServerUri);
 
         if(teamFoundationServerUri == null || teamFoundationServerUri.trim() == "")
             throw new Error ("SYSTEM_TEAMFOUNDATIONCOLLECTIONURI is not set");
@@ -23,12 +24,12 @@ export class AzureService
         if(regexGroup == null || regexGroup.length != 2)
             throw new Error("Organization name could not be found.");
 
-        console.log(`Organisation name: ${regexGroup[1]}`);
+        console.log(`AzureService.getOrganizationName - organisationName: ${regexGroup[1]}`);
 
         return regexGroup[1];
     }
 
-    static expandPackageWildcardPatterns(packagePattern: string): string {
+    static expandPackageWildcardPatterns(packagePattern: string): string[] {
         const matchedSolutionFiles = tl.findMatch(
             null,
             packagePattern,
@@ -37,17 +38,9 @@ export class AzureService
                 followSpecifiedSymbolicLink: false,
                 allowBrokenSymbolicLinks : true
             });
+        tl.debug(`AzureService.expandPackageWildcardPatterns - Found ${matchedSolutionFiles.length} solution files matching the pattern.`);
 
-        tl.debug(`Found ${matchedSolutionFiles.length} solution files matching the pattern.`);
-
-        if (matchedSolutionFiles.length > 0) {
-            const result = matchedSolutionFiles[0];
-            if (matchedSolutionFiles.length > 1)
-                tl.warning(tl.loc('MultiplePackagesFound', result));
-
-            return result;
-        } else {
-            throw tl.loc('PackageDoesNotExist', packagePattern);
-        }
+        if (matchedSolutionFiles.length > 0) return matchedSolutionFiles;
+        else throw tl.loc('PackageDoesNotExist', packagePattern);
     }
 }

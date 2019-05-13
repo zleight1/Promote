@@ -3,7 +3,7 @@
   "id": "Promote",
   "name": "Promote",
   "description": "Tool to allow the promotion of a package to a specified view.",
-  "version": "1.5.5",
+  "version": "1.6.0",
   "publisher": "Haplo",
   "Public": true,
   "repository": {
@@ -27,6 +27,9 @@
     "promote",
     "package",
     "nuget",
+    "npm",
+    "python",
+    "pypi",
     "release"
   ],
   "links": {
